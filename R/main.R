@@ -1,7 +1,12 @@
-list.of.packages <- c("tidyverse", "Rcpp")
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
+pacman::p_load(tidyverse, Rcpp, RcppArmadillo)
+sourceCpp('R//c_code.cpp')
 
-
-library(tidyverse)
-library(Rcpp)
+cppFunction(depends = "RcppArmadillo",
+            ' 
+  arma::vec GLS_cpp( arma::mat X, arma::mat V, arma::vec y ) {
+    arma::mat V_inv = inv(V); 
+    arma::vec res   = inv(X.t() * V_inv * X) * X.t() * V_inv * y;
+    return res;
+  }
+'
+)
