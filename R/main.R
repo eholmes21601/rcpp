@@ -10,3 +10,10 @@ cppFunction(depends = "RcppArmadillo",
   }
 '
 )
+
+data(trees, package="datasets")
+fastLm(cbind(1, log(trees$Girth)), log(trees$Volume))
+
+y.pred <- as.vector(lm(log(Volume) ~ log(Girth), data = trees)$fitted.values)
+res <- log(trees$Volume) - y.pred
+res %*% res

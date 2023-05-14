@@ -1,24 +1,19 @@
 #include <RcppArmadillo.h>
-using namespace Rcpp;
-
-
-//
-
 // [[Rcpp::depends(RcppArmadillo)]]
+
 // [[Rcpp::export]]
-arma::mat M1 (NumericMatrix x,NumericVector y) {
-  arma::mat x_ = as<arma::mat>(x);
-  arma::vec y_ = as<arma::vec>(y);
-  arma::mat z = inv(x_) + y_*y_.t();
-  return(arma::diagvec(z)) ;
+Rcpp::List fastLm(const arma::mat& X, const arma::colvec& y) {
+  int n = X.n_rows, k = X.n_cols;
+  
+  arma::colvec coef = arma::solve(X, y);     // fit model y ~ X
+  arma::colvec res  = y - X*coef;            // residual error
+  double s2 = arma::dot(res, res) / (n - k); // std.errors of coefficients
+  arma::colvec std_err = arma::sqrt(s2 * arma::diagvec(arma::pinv(arma::trans(X)*X)));
+  
+  return Rcpp::List::create(Rcpp::Named("coefficients") = coef,
+                            Rcpp::Named("stderr")       = std_err,
+                            Rcpp::Named("df.residual")  = n - k);
 }
 
 
-// You can include R code blocks in C++ files processed with sourceCpp
-// (useful for testing and development). The R code will be automatically 
-// run after the compilation.
-//
-
-/*** R
-M1(matrix(c(1,3,2,4),2,2), c(2,3))
-*/
+ 
