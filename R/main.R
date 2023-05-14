@@ -1,18 +1,13 @@
-pacman::p_load(tidyverse, Rcpp, RcppArmadillo)
+pacman::p_load(tidyverse, Rcpp, RcppArmadillo, BH)
 sourceCpp('R//c_code.cpp')
 
-cppFunction(depends = "RcppArmadillo",
-            ' 
-  arma::vec GLS_cpp( arma::mat X, arma::mat V, arma::vec y ) {
-    arma::mat V_inv = inv(V); 
-    arma::vec res   = inv(X.t() * V_inv * X) * X.t() * V_inv * y;
-    return res;
-  }
-'
-)
-
+#in Rcpp
 data(trees, package="datasets")
-fastLm(cbind(1, log(trees$Girth)), log(trees$Volume))
+out <- lm_cpp(cbind(1, log(trees$Girth)), log(trees$Volume))
+2 * pt(abs(out$t.value), out$df.residual, lower.tail = FALSE)
+## in R
+fit1 <- summary(lm(log(Volume) ~ log(Girth), data = trees));fit1
+
 
 y.pred <- as.vector(lm(log(Volume) ~ log(Girth), data = trees)$fitted.values)
 res <- log(trees$Volume) - y.pred
