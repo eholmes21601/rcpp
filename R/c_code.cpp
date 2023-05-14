@@ -26,10 +26,5 @@ Rcpp::List lm_cpp(const arma::mat& X, const arma::colvec& y) {
                             Rcpp::Named("p.values")  = 2 * p_values);
 }
 
-// [[Rcpp::depends(BH)]]
-// [[Rcpp::export]] 
- int computeGCD(int a, int b) {
-  return boost::integer::gcd(a, b);
-}
 
  
